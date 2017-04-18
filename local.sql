@@ -1,25 +1,25 @@
-select * from name_gender;
+create table employees(
+emp_id integer primary key,
+pesel number(11,0) not null,
+name varchar2(8),
+last_name varchar2(8),
+salary number(6,0) check (salary > 1000),
+address varchar2(20)
+);
 
-insert into employee values(
-'strasse', 2200, 1, 'Kamil', 2100); %eror
+create table name_gender(
+name varchar2(8) not null primary key,
+gender char(7)
+);
 
-alter table employee
-drop column pesel;
-
-alter table employee
-drop column gender;
-
-create table device(
+create table devices(
 device_id int not null primary key,
 type varchar(20),
 owner int,
-foreign key (owner) references employee(employee_id) on delete set null)
+foreign key (owner) references employee(employee_id) on delete set null
+);
 
-alter table name_gender
-add (constraint name_gender_pk_const primary key (name));
-
-alter table employee
-add (name varchar(20) )
+alter table employees
 add (constraint name_gender_const foreign key (name) references name_gender(name));
 
 insert into name_gender values (
