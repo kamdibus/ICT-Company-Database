@@ -1,4 +1,26 @@
-Prior to the undermentioned  tables employee, device, name_gender, team and project were created. Unfortunately, no record of that remained..
+create table employee(
+pesel int primary key not null check ( pesel > 11111111111 and pesel < 99999999999), /*both pesel and gender dropped beneath*/
+gender varchar(6),
+address varchar(30),
+salary int check (salary > 2000),
+bonus int check ( bonus > 100 and bonus < 20000))
+
+alter table employee
+drop column gender;
+
+alter table employee
+drop column pesel;
+
+create table name_gender(
+name varchar(20) not null primary key,
+gender varchar(6) not null)
+
+alter table name_gender
+add (constraint name_gender_pk primary key (name));
+
+alter table employee
+add (name varchar(20) not null)
+add (constraint name_gender_const foreign key (name) references name_gender(name));
 
 insert into name_gender values (
 'Kamil', 'male');
@@ -9,24 +31,11 @@ insert into name_gender values (
 insert into name_gender values (
 'Ewa', 'female');
 
-alter table employee
-add (name varchar(20) )
-add (constraint name_gender_const foreign key (name) references name_gender(name));
-
-alter table name_gender
-add (constraint name_gender_pk_const primary key (name));
-
 create table device(
 device_id int not null primary key,
 type varchar(20),
 owner int,
 foreign key (owner) references employee(employee_id) on delete set null)
-
-alter table employee
-drop column gender;
-
-alter table employee
-drop column pesel;
 
 select * from name_gender;
 
@@ -36,11 +45,16 @@ drop constraint SYS_C007028;
 alter table works_on
 drop constraint SYS_C007027;
 
-alter table works_on
-add (constraint project_fk foreign key (project) references project(project_id) on delete cascade);
+create table works_on(
+employee int not null,
+project int not null,
+hours int check (hours > 20))
 
 alter table works_on
-add (constraint employee_fk foreign key (employee) references employee(employee_id) on delete cascade);
+add (constraint project_workson_fk foreign key (project) references project(project_id) on delete cascade);
+
+alter table works_on
+add (constraint employee_workson_fk foreign key (employee) references employee(employee_id) on delete cascade);
 
 insert into employee values(
 'strasse', 2200, 200, 3, 'Dominik');
