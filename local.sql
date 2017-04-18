@@ -96,15 +96,50 @@ alter table manager
 add (employee_id int not null references employee(employee_id))
 add (constraint manager_isa_pk primary key (employee_id));
 
-insert into manager values (
-TO_DATE('11/11/2011', 'DD/MM/YYYY'), 1);
-
-insert into manager values (
-TO_DATE('11/11/2011', 'DD/MM/YYYY'), 2);
-
 /*Manager manages one Team. Every Team has a Manager. Not every Manager manages a Team.*/
 alter table manager 
 add (team_id int unique);
 
 alter table manager
 add (constraint manager_team_fk foreign key (team_id) references team(team_id));
+
+/*Here TEAM_ID also needs to be inserted*/
+insert into manager values (
+TO_DATE('11/11/2011', 'DD/MM/YYYY'), 1);
+
+insert into manager values (
+TO_DATE('11/11/2011', 'DD/MM/YYYY'), 2);
+
+/*Selecting employees which are managers*/
+create view show_managers as
+select employee.*, manager.PROMOTION_DATE, manager.TEAM_ID
+from employee, manager
+where employee.employee_id=manager.employee_id;
+/*from employee
+join manager
+as employee.employee_id=manager.employee_id;*/
+
+
+/*Descending id employees select. Polish names of columns.*/
+select ADDRESS as adres, SALARY as pensja, BONUS as premia, EMPLOYEE_ID as id, NAME as imie  from employee
+order by EMPLOYEE_ID DESC;
+
+create sequence employee_id
+start with 1
+increment by 1
+cache 5000;
+
+create sequence team_id
+start with 1
+increment by 1
+cache 5000;
+
+create view show_managers_w_gender as
+select employee.*, manager.PROMOTION_DATE, manager.TEAM_ID, name_gender.GENDER
+from employee, manager, name_gender
+where employee.employee_id=manager.employee_id and employee.NAME=name_gender.NAME;
+
+create view projects as
+select employee.NAME, employee.employee_id, works_on.hours, project.project_name
+from employee, works_on, project
+where employee.employee_id=works_on.employee;
