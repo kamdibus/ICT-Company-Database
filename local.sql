@@ -73,3 +73,24 @@ into works_on (employee, project, hours) values (1, 1, 40)
 into works_on (employee, project, hours) values (2, 2, 40)
 into works_on (employee, project, hours) values (1, 2, 40)
 select * from dual;
+
+/*Requires ISA relatoinship*/
+create table manager(
+promotion_date date)
+
+alter table manager
+add (employee_id int not null references employee(employee_id))
+add (constraint manager_isa_pk primary key (employee_id));
+
+insert into manager values (
+TO_DATE('11/11/2011', 'DD/MM/YYYY'), 1);
+
+insert into manager values (
+TO_DATE('11/11/2011', 'DD/MM/YYYY'), 2);
+
+/*Manager manages one Team. Every Team has a Manager. Not every Manager manages a Team.*/
+alter table manager 
+add (team_id int unique);
+
+alter table manager
+add (constraint manager_team_fk foreign key (team_id) references team(team_id));
