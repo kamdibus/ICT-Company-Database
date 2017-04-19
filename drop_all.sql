@@ -9,3 +9,8 @@ drop table teams;
 drop table managers;
 drop table employees;
 drop table names_gender;
+drop sequence seq_projects;
+drop sequence seq_clients;
+drop sequence seq_teams;
+drop sequence seq_devices;
+drop sequence seq_employees;
