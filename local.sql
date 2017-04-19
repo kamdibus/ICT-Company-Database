@@ -143,9 +143,9 @@ from employees_gender inner join managers on employees_gender.employee_id = mana
 insert into teams select seq_teams.nextval, 'zesp 1', employee_id FROM managers_all_data WHERE last_name='Kowalski';
 insert into teams select seq_teams.nextval, 'zesp 2', employee_id FROM managers_all_data WHERE last_name='Kowalska';
 
-insert into projects values (seq_projects.nextval, 'projekt BD', 1, 1);
-insert into projects values (seq_projects.nextval, 'projekt 2', 2, 2);
+insert into projects values (seq_projects.nextval, 'projekt BD', 2, 2);
+insert into projects values (seq_projects.nextval, 'projekt 2', 3, 3);
 
-insert into works_on values (1, 1, 10);
-insert into works_on values (1, 2, 2);
-insert into works_on values (3, 1, 5);
+insert into works_on values (2, 2, 10);
+insert into works_on values (2, 3, 2);
+insert into works_on values (4, 2, 5);
