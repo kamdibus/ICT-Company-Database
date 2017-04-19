@@ -129,4 +129,8 @@ create view female_employees as
 select employee_id, pesel, first_name, last_name, salary, address
 from employees_gender
 where gender='female';
+
+create view managers_all_data as
+select employees_gender.*, managers.promotion_date, managers.bonus
+from employees_gender inner join managers on employees_gender.employee_id = managers.employee_id;
 /* END - simple views */
