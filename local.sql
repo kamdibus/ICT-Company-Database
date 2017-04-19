@@ -106,3 +106,18 @@ insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kow
 /* 'non-trivial' insert */
 insert into devices SELECT seq_devices.nextval, 'Nokia xxx', employee_id FROM employees WHERE last_name='Kowalska';
 insert into devices SELECT seq_devices.nextval, 'ASUS R556L', employee_id FROM employees WHERE address='Warszawa...';
+
+/* simple views */
+create view employees_gender as
+select employees.*, names_gender.gender 
+from employees inner join names_gender on names_gender.first_name = employees.first_name;
+
+create view male_employees as
+select employee_id, pesel, first_name, last_name, salary, address
+from employees_gender
+where gender='male';
+
+create view female_employees as
+select employee_id, pesel, first_name, last_name, salary, address
+from employees_gender
+where gender='female';
