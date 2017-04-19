@@ -1,3 +1,6 @@
+drop view female_employees;
+drop view male_employees;
+drop view employees_gender;
 drop table devices;
 drop table works_on;
 drop table projects;
