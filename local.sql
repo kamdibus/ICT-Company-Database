@@ -105,14 +105,18 @@ insert into employees values (seq_employees.nextval, 96123100001, 'Tomasz', 'Now
 insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Biduś', 4100, 'Warszawa...');
 insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Kraków...');
 insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Kraków...');
+
+insert into clients values (seq_clients.nextval, 'klient 1 a');
+insert into clients values (seq_clients.nextval, 'klient 2 b');
+insert into clients values (seq_clients.nextval, 'klient 3 c');
 /* END - trivial insert */
 
 /* non-trivial insert */
 insert into managers select to_date('11/11/2011', 'DD/MM/YYYY'), 1000, employee_id FROM employees WHERE last_name='Kowalski';
 insert into managers select to_date('11/11/2011', 'DD/MM/YYYY'), 1000, employee_id FROM employees WHERE last_name='Kowalska';
 
-insert into devices SELECT seq_devices.nextval, 'Nokia xxx', employee_id FROM employees WHERE last_name='Kowalska';
-insert into devices SELECT seq_devices.nextval, 'ASUS R556L', employee_id FROM employees WHERE address='Warszawa...';
+insert into devices select seq_devices.nextval, 'Nokia xxx', employee_id FROM employees WHERE last_name='Kowalska';
+insert into devices select seq_devices.nextval, 'ASUS R556L', employee_id FROM employees WHERE address='Warszawa...';
 /* END - non-trivial insert */
 
 /* simple views */
@@ -134,3 +138,14 @@ create view managers_all_data as
 select employees_gender.*, managers.promotion_date, managers.bonus
 from employees_gender inner join managers on employees_gender.employee_id = managers.employee_id;
 /* END - simple views */
+
+/* non-trivial insert (continuation) */
+insert into teams select seq_teams.nextval, 'zesp 1', employee_id FROM managers_all_data WHERE last_name='Kowalski';
+insert into teams select seq_teams.nextval, 'zesp 2', employee_id FROM managers_all_data WHERE last_name='Kowalska';
+
+insert into projects values (seq_projects.nextval, 'projekt BD', 1, 1);
+insert into projects values (seq_projects.nextval, 'projekt 2', 2, 2);
+
+insert into works_on values (1, 1, 10);
+insert into works_on values (1, 2, 2);
+insert into works_on values (3, 1, 5);
