@@ -1,3 +1,4 @@
+drop procedure change_salary;
 drop view female_employees;
 drop view male_employees;
 drop view employees_gender;
