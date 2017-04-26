@@ -102,9 +102,9 @@ insert into names_gender values ('Tomasz', 'male');
 insert into names_gender values ('Anna', 'female');
 
 insert into employees values (seq_employees.nextval, 96123100001, 'Tomasz', 'Nowak', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Biduś', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Kraków...');
-insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Kraków...');
+insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'BiduĹ›', 4100, 'Warszawa...');
+insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'KrakĂłw...');
+insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'KrakĂłw...');
 
 insert into clients values (seq_clients.nextval, 'klient 1 a');
 insert into clients values (seq_clients.nextval, 'klient 2 b');
@@ -140,5 +140,60 @@ from employees_gender inner join managers on employees_gender.employee_id = mana
 /* END - simple views */
 
 /* non-trivial insert (continuation) */
-insert into teams select seq_teams.nextval, 'zesp 1', employee_id FROM managers_all_data WHERE last_name='Kowalski';
-insert into teams select seq_teams.nextval, 'zesp 2', employee_id FROM managers_all_data WHERE last_name='Kowalska';
+insert into teams select seq_teams.nextval, 'zesp 1', employee_id from managers_all_data where last_name='Kowalski';
+insert into teams select seq_teams.nextval, 'zesp 2', employee_id from managers_all_data where last_name='Kowalska';
+
+/*
+create view tmp as
+select teams.team_id, clients.client_id from teams
+left outer join clients on client_name='klient 1 a';
+select * from tmp;
+drop view tmp;
+*/
+
+insert into projects values(seq_projects.nextval, 'projekt 1', 2, 2);
+insert into projects select seq_projects.nextval, 'projekt 2', teams.team_id, clients.client_id 
+from teams, clients where team_name='zesp 2' and client_name='klient 2 b';
+
+insert into works_on select employees.employee_id, projects.project_id, 15
+from employees, projects where last_name='Nowak' and project_name='projekt 1';
+
+insert into works_on select employees.employee_id, projects.project_id, 11
+from employees, projects where last_name='BiduĹ›' and project_name='projekt 1';
+
+insert into works_on select employees.employee_id, projects.project_id, 11
+from employees, projects where last_name='Kowalska' and project_name='projekt 2';
+
+select * from clients;
+select * from devices;
+select * from employees_gender;
+select * from managers_all_data;
+select * from projects;
+select * from teams;
+select * from works_on;
+
+/* transaction */
+begin
+update managers set bonus = bonus + 200;
+update employees set salary = salary + 100;
+commit;
+end;
+
+/* procedure - 0.5p */
+create or replace function change_salary(emp_id in int, amount in int)
+return employees.salary%type is
+new_salary employees.salary%type;
+begin
+  select salary into new_salary from employees where employee_id = emp_id;
+  if new_salary < 0 then
+    raise_application_error (-20001, 'WRONG DATA');
+  end if;
+  update employees set salary = new_salary where employee_id = emp_id;
+  return new_salary;
+  exception
+  when no_data_found then
+    raise_application_error (-20001, 'WRONG DATA');
+end change_salary;
+/
+
+execute change_salary(2,-50);
