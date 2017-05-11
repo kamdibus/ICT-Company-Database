@@ -1,145 +1,199 @@
-create table employee(
-pesel int primary key not null check ( pesel > 11111111111 and pesel < 99999999999), /*both pesel and gender dropped beneath*/
-gender varchar(6),
-address varchar(30),
-salary int check (salary > 2000),
-bonus int check ( bonus > 100 and bonus < 20000))
+/* create all tables */
+create table names_gender(
+first_name varchar2(8) not null primary key,
+gender char(7)
+);
 
-alter table employee
-drop column gender;
+create table employees(
+employee_id integer primary key,
+pesel number(11,0) not null unique,
+first_name varchar2(8),
+foreign key (first_name) references names_gender(first_name),
+last_name varchar2(8),
+salary number(6,0) check (salary > 1000),
+address varchar2(20)
+);
+/* alter table employees add constraint unique_pesel unique(pesel); - not needed */
 
-alter table employee
-drop column pesel;
+/* auto-generated employee_id */
+create sequence seq_employees
+minvalue 1
+start with 1
+increment by 1
+cache 8;
 
-create table name_gender(
-name varchar(20) not null primary key,
-gender varchar(6) not null)
+create table managers(
+promotion_date date,
+bonus number(6,0)
+);
 
-alter table name_gender
-add (constraint name_gender_pk primary key (name));
-
-alter table employee
-add (name varchar(20) not null)
-add (constraint name_gender_const foreign key (name) references name_gender(name));
-
-insert into name_gender values (
-'Kamil', 'male');
-insert into name_gender values (
-'Tomasz', 'male');
-insert into name_gender values (
-'Dominik', 'male');
-insert into name_gender values (
-'Ewa', 'female');
-
-create table device(
-device_id int not null primary key,
-type varchar(20),
-owner int,
-foreign key (owner) references employee(employee_id) on delete set null)
-
-select * from name_gender;
-
-alter table works_on
-drop constraint SYS_C007028;
-
-alter table works_on
-drop constraint SYS_C007027;
-
-create table works_on(
-employee int not null,
-project int not null,
-hours int check (hours > 20))
-
-alter table works_on
-add (constraint project_workson_fk foreign key (project) references project(project_id) on delete cascade);
-
-alter table works_on
-add (constraint employee_workson_fk foreign key (employee) references employee(employee_id) on delete cascade);
-
-insert into employee values(
-'strasse', 2200, 200, 3, 'Dominik');
-insert into employee values(
-'strasse', 2500, 300, 2, 'Ewa');
-insert into employee values(
-'strasse', 2200, 2100, 1, 'Kamil');
-
-insert into device values(
-3, 'M-B GLA', 1);
-insert into device values(
-2, 'laptop', 1);
-insert into device values(
-1, 'smartphone', 1);
-
-insert all 
-into project (project_id, project_name) values (1, 'ICT-DB')
-into project (project_id, project_name) values (2, 'SOI')
-into project (project_id, project_name) values (3, 'PROZ')
-select * from dual;
-
-insert all 
-into team (team_id, team_name) values (1, 'team1')
-into team (team_id, team_name) values (2, 'team2')
-into team (team_id, team_name) values (3, 'teamt_hree')
-select * from dual;
-
-insert all 
-into works_on (employee, project, hours) values (1, 1, 40)
-into works_on (employee, project, hours) values (2, 2, 40)
-into works_on (employee, project, hours) values (1, 2, 40)
-select * from dual;
-
-/*Requires ISA relatoinship*/
-create table manager(
-promotion_date date)
-
-alter table manager
-add (employee_id int not null references employee(employee_id))
+alter table managers /* relation Manager ISA Employee */
+add (employee_id int not null references employees(employee_id))
 add (constraint manager_isa_pk primary key (employee_id));
 
-/*Manager manages one Team. Every Team has a Manager. Not every Manager manages a Team.*/
-alter table manager 
-add (team_id int unique);
+create table devices(
+device_id int not null primary key,
+device_name varchar2(20),
+owner int, /* relation Employee OWNS Device */
+foreign key (owner) references employees(employee_id) on delete set null
+);
 
-alter table manager
-add (constraint manager_team_fk foreign key (team_id) references team(team_id));
-
-/*Here TEAM_ID also needs to be inserted*/
-insert into manager values (
-TO_DATE('11/11/2011', 'DD/MM/YYYY'), 1);
-
-insert into manager values (
-TO_DATE('11/11/2011', 'DD/MM/YYYY'), 2);
-
-/*Selecting employees which are managers*/
-create view show_managers as
-select employee.*, manager.PROMOTION_DATE, manager.TEAM_ID
-from employee, manager
-where employee.employee_id=manager.employee_id;
-/*from employee
-join manager
-as employee.employee_id=manager.employee_id;*/
-
-
-/*Descending id employees select. Polish names of columns.*/
-select ADDRESS as adres, SALARY as pensja, BONUS as premia, EMPLOYEE_ID as id, NAME as imie  from employee
-order by EMPLOYEE_ID DESC;
-
-create sequence employee_id
+/* auto-generated device_id */
+create sequence seq_devices
+minvalue 1
 start with 1
 increment by 1
-cache 5000;
+cache 8;
 
-create sequence team_id
+create table teams(
+team_id int not null primary key,
+team_name varchar2(20),
+manager_id int not null, /* relation Manager MANAGES Team */
+foreign key(manager_id) references managers(employee_id)
+);
+
+/* auto-generated team_id */
+create sequence seq_teams
+minvalue 1
 start with 1
 increment by 1
-cache 5000;
+cache 8;
 
-create view show_managers_w_gender as
-select employee.*, manager.PROMOTION_DATE, manager.TEAM_ID, name_gender.GENDER
-from employee, manager, name_gender
-where employee.employee_id=manager.employee_id and employee.NAME=name_gender.NAME;
+create table clients(
+client_id int not null primary key,
+client_name varchar2(20)
+);
 
-create view projects as
-select employee.NAME, employee.employee_id, works_on.hours, project.project_name
-from employee, works_on, project
-where employee.employee_id=works_on.employee;
+/* auto-generated client_id */
+create sequence seq_clients
+minvalue 1
+start with 1
+increment by 1
+cache 8;
+
+create table projects(
+project_id int not null primary key,
+project_name varchar2(20),
+team_id int not null, /* relation Team CONTROLS Project */
+foreign key(team_id) references teams(team_id),
+client_id int not null, /* relation Client ORDERED Project */
+foreign key(client_id) references clients(client_id)
+);
+
+/* auto-generated project_id */
+create sequence seq_projects
+minvalue 1
+start with 1
+increment by 1
+cache 8;
+
+create table works_on( /* relation N:M WORKS_ON */
+employee_id int not null,
+foreign key (employee_id) references employees(employee_id) on delete cascade,
+project_id int not null,
+foreign key (project_id) references projects(project_id) on delete cascade,
+hours int
+);
+/* END - create all tables */
+
+/* trivial insert */
+insert into names_gender values ('Kamil', 'male');
+insert into names_gender values ('Tomasz', 'male');
+insert into names_gender values ('Anna', 'female');
+
+insert into employees values (seq_employees.nextval, 96123100001, 'Tomasz', 'Nowak', 4100, 'Warszawa...');
+insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Biduś', 4100, 'Warszawa...');
+insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Kraków...');
+insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Kraków...');
+
+insert into clients values (seq_clients.nextval, 'klient 1 a');
+insert into clients values (seq_clients.nextval, 'klient 2 b');
+insert into clients values (seq_clients.nextval, 'klient 3 c');
+/* END - trivial insert */
+
+/* non-trivial insert */
+insert into managers select to_date('11/11/2011', 'DD/MM/YYYY'), 1000, employee_id FROM employees WHERE last_name='Kowalski';
+insert into managers select to_date('11/11/2011', 'DD/MM/YYYY'), 1000, employee_id FROM employees WHERE last_name='Kowalska';
+
+insert into devices select seq_devices.nextval, 'Nokia xxx', employee_id FROM employees WHERE last_name='Kowalska';
+insert into devices select seq_devices.nextval, 'ASUS R556L', employee_id FROM employees WHERE address='Warszawa...';
+/* END - non-trivial insert */
+
+/* simple views */
+create view employees_gender as
+select employees.*, names_gender.gender 
+from employees inner join names_gender on names_gender.first_name = employees.first_name;
+
+create view male_employees as
+select employee_id, pesel, first_name, last_name, salary, address
+from employees_gender
+where gender='male';
+
+create view female_employees as
+select employee_id, pesel, first_name, last_name, salary, address
+from employees_gender
+where gender='female';
+
+create view managers_all_data as
+select employees_gender.*, managers.promotion_date, managers.bonus
+from employees_gender inner join managers on employees_gender.employee_id = managers.employee_id;
+/* END - simple views */
+
+/* non-trivial insert (continuation) */
+insert into teams select seq_teams.nextval, 'zesp 1', employee_id from managers_all_data where last_name='Kowalski';
+insert into teams select seq_teams.nextval, 'zesp 2', employee_id from managers_all_data where last_name='Kowalska';
+
+/*
+create view tmp as
+select teams.team_id, clients.client_id from teams
+left outer join clients on client_name='klient 1 a';
+select * from tmp;
+drop view tmp;
+*/
+
+insert into projects values(seq_projects.nextval, 'projekt 1', 2, 2);
+insert into projects select seq_projects.nextval, 'projekt 2', teams.team_id, clients.client_id 
+from teams, clients where team_name='zesp 2' and client_name='klient 2 b';
+
+insert into works_on select employees.employee_id, projects.project_id, 15
+from employees, projects where last_name='Nowak' and project_name='projekt 1';
+
+insert into works_on select employees.employee_id, projects.project_id, 11
+from employees, projects where last_name='Biduś' and project_name='projekt 1';
+
+insert into works_on select employees.employee_id, projects.project_id, 11
+from employees, projects where last_name='Kowalska' and project_name='projekt 2';
+
+select * from clients;
+select * from devices;
+select * from employees_gender;
+select * from managers_all_data;
+select * from projects;
+select * from teams;
+select * from works_on;
+
+/* transaction */
+begin
+update managers set bonus = bonus + 200;
+update employees set salary = salary + 100;
+commit;
+end;
+/
+
+/* procedure - 0.5p */
+create or replace procedure change_salary(emp_id in int, amount in int) is
+new_salary employees.salary%type;
+begin
+  select salary into new_salary from employees where employee_id = emp_id;
+  new_salary := new_salary + amount;
+  if new_salary < 0 then
+    raise_application_error (-20001, 'WRONG DATA');
+  end if;
+  update employees set salary = new_salary where employee_id = emp_id;
+  exception
+  when no_data_found then
+    raise_application_error (-20001, 'WRONG DATA');
+end change_salary;
+/
+
+execute change_salary(2,-50);
