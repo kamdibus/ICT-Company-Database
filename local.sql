@@ -102,9 +102,9 @@ insert into names_gender values ('Tomasz', 'male');
 insert into names_gender values ('Anna', 'female');
 
 insert into employees values (seq_employees.nextval, 96123100001, 'Tomasz', 'Nowak', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Bidu≈õ', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Krak√≥w...');
-insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Krak√≥w...');
+insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Biduú', 4100, 'Warszawa...');
+insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'KrakÛw...');
+insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'KrakÛw...');
 
 insert into clients values (seq_clients.nextval, 'klient 1 a');
 insert into clients values (seq_clients.nextval, 'klient 2 b');
@@ -159,7 +159,7 @@ insert into works_on select employees.employee_id, projects.project_id, 15
 from employees, projects where last_name='Nowak' and project_name='projekt 1';
 
 insert into works_on select employees.employee_id, projects.project_id, 11
-from employees, projects where last_name='Bidu≈õ' and project_name='projekt 1';
+from employees, projects where last_name='Biduú' and project_name='projekt 1';
 
 insert into works_on select employees.employee_id, projects.project_id, 11
 from employees, projects where last_name='Kowalska' and project_name='projekt 2';
