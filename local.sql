@@ -197,3 +197,45 @@ end change_salary;
 /
 
 execute change_salary(2,-50);
+
+/* procedure fulfilling b), c) and d) criteria */
+create or replace procedure confirm_project(
+company in varchar2, 
+project_name in varchar2,
+team in varchar2) is
+id_team teams.team_id%type;
+id_client clients.client_id%type;
+begin
+  declare
+    any_rows_found1 number;
+  begin
+    select count(*) into any_rows_found1 from teams where rownum=1 and team_name = team;
+  end;
+  if any_rows_found1 then
+      select team_id into id_team from teams where team_name = team;
+  else
+      raise_application_error (-20001, 'WRONG DATA');
+  end if;
+  
+  declare
+  any_rows_found2 number;
+  begin
+    select count(*) into any_rows_found2 from clients where rownum=1 and client_name = company;
+  end;
+  if not any_rows_found2 then
+      insert into clients
+      values (seq_clients.nextval, company);
+  end if;
+  
+  select client_id into id_client from clients where client_name = company;
+  
+  insert into projects
+  values( seq_projects.nextval, project_name, id_team, id_client);
+  
+  exception
+  when no_data_found then
+    raise_application_error (-20001, 'WRONG DATA');
+end confirm_project;
+
+execute confirm_project('Millenium', 'Security', 'zesp 1');
+
