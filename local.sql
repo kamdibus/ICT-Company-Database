@@ -238,4 +238,45 @@ begin
 end confirm_project;
 
 execute confirm_project('Millenium', 'Security', 'zesp 1');
+  
+/* parsing function, when flag=1 returns first word before ' ' when flag=2 returns second */
+create or replace function parse_value (pValue varchar2, flag number)
+   return varchar2
+is
+   v_pos number;
+   v_pos2 number;
+begin
+  if flag=1 then
+    v_pos2 := INSTR (pValue, ' ', 1) - 1; /* +1? */
+    v_pos := 1;
+  else
+    v_pos := INSTR (pValue, ' ', 1) + 1;
+    v_pos2 := LENGTH(pValue) - v_pos +1;
+  end if;
+  return SUBSTR (pValue, v_pos, v_pos2);
+end parse_value;
 
+/* check how does the parser work */
+begin
+dbms_output.put_line(parse_value('Kamil Biduœ', 1));
+end;
+begin
+dbms_output.put_line(parse_value('Kamil Biduœ', 2));
+end;
+
+/* procedure that has one argument, returns value, has substantial meaning, processes data from 3 tables */
+create or replace procedure promote(
+employee in varchar2, bonus in NUMBER, teamname in varchar2 default null) is
+id_employee EMPLOYEES.EMPLOYEE_ID%type;
+begin
+  select employee_id into id_employee from employees where FIRST_NAME = parse_value(employee, 1) and LAST_NAME = parse_value(employee, 2);
+  insert into MANAGERS
+  values (SYSDATE, bonus, id_employee);
+  if teamname is not null then
+    update teams
+    set manager_id = id_employee
+    where team_name = teamname;
+  end if;
+end promote;
+
+execute promote ('Kamil Biduœ', 200, 'zesp 1');
