@@ -1,3 +1,5 @@
+drop function parse_value;
+drop procedure promote;
 drop procedure change_salary;
 drop procedure confirm_project;
 drop view female_employees;

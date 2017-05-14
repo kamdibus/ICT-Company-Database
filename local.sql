@@ -210,22 +210,22 @@ begin
     any_rows_found1 number;
   begin
     select count(*) into any_rows_found1 from teams where rownum=1 and team_name = team;
-  end;
-  if any_rows_found1 then
+  if any_rows_found1=1 then
       select team_id into id_team from teams where team_name = team;
   else
       raise_application_error (-20001, 'WRONG DATA');
   end if;
+  end;
   
   declare
   any_rows_found2 number;
   begin
     select count(*) into any_rows_found2 from clients where rownum=1 and client_name = company;
-  end;
-  if not any_rows_found2 then
+  if not any_rows_found2=1 then
       insert into clients
       values (seq_clients.nextval, company);
   end if;
+  end;
   
   select client_id into id_client from clients where client_name = company;
   
@@ -235,6 +235,9 @@ begin
   exception
   when no_data_found then
     raise_application_error (-20001, 'WRONG DATA');
+    rollback;
+    
+  commit;
 end confirm_project;
 
 execute confirm_project('Millenium', 'Security', 'zesp 1');
@@ -280,3 +283,16 @@ begin
 end promote;
 
 execute promote ('Kamil Biduœ', 200, 'zesp 1');
+
+/* cursor with a loop */
+declare
+cursor get_clietns_projects(client number) is
+select * from projects where client_id=client;
+wiersz projects%rowtype;
+begin
+for wiersz in get_clietns_projects(4) loop
+dbms_output.put_line('pobrano kolejny wiersz, projekt: '|| wiersz.project_name);
+end loop;
+end;
+
+
