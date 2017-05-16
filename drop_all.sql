@@ -1,3 +1,4 @@
+drop package default_functionality;
 drop function parse_value;
 drop procedure promote;
 drop procedure change_salary;
@@ -6,6 +7,7 @@ drop view female_employees;
 drop view male_employees;
 drop view employees_gender;
 drop view managers_all_data;
+drop table projects_log;
 drop table devices;
 drop table works_on;
 drop table projects;

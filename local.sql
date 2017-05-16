@@ -102,9 +102,9 @@ insert into names_gender values ('Tomasz', 'male');
 insert into names_gender values ('Anna', 'female');
 
 insert into employees values (seq_employees.nextval, 96123100001, 'Tomasz', 'Nowak', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Biduœ', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Kraków...');
-insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Kraków...');
+insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Bidu?', 4100, 'Warszawa...');
+insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Krak?w...');
+insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Krak?w...');
 
 insert into clients values (seq_clients.nextval, 'klient 1 a');
 insert into clients values (seq_clients.nextval, 'klient 2 b');
@@ -159,7 +159,7 @@ insert into works_on select employees.employee_id, projects.project_id, 15
 from employees, projects where last_name='Nowak' and project_name='projekt 1';
 
 insert into works_on select employees.employee_id, projects.project_id, 11
-from employees, projects where last_name='Biduœ' and project_name='projekt 1';
+from employees, projects where last_name='Bidu?' and project_name='projekt 1';
 
 insert into works_on select employees.employee_id, projects.project_id, 11
 from employees, projects where last_name='Kowalska' and project_name='projekt 2';
@@ -197,6 +197,60 @@ end change_salary;
 /
 
 execute change_salary(2,-50);
+
+/* package declaration */
+create or replace package default_functionality is
+
+/* parsing function, when flag=1 returns first word before ' ' when flag=2 returns second */
+function parse_value(pValue varchar2, flag number) return varchar2;
+/* procedure that has one argument, returns value, has substantial meaning, processes data from 3 tables */
+procedure promote(employee in varchar2, bonus in NUMBER, teamname in varchar2 default null);
+end;
+/
+/* package body */
+create or replace package body default_functionality is
+
+function parse_value (pValue varchar2, flag number)
+   return varchar2
+is
+   v_pos number;
+   v_pos2 number;
+begin
+  if flag=1 then
+    v_pos2 := INSTR (pValue, ' ', 1) - 1; /* +1? */
+    v_pos := 1;
+  else
+    v_pos := INSTR (pValue, ' ', 1) + 1;
+    v_pos2 := LENGTH(pValue) - v_pos +1;
+  end if;
+  return SUBSTR (pValue, v_pos, v_pos2);
+end parse_value;
+
+procedure promote(
+employee in varchar2, bonus in NUMBER, teamname in varchar2 default null) is
+id_employee EMPLOYEES.EMPLOYEE_ID%type;
+begin
+  select employee_id into id_employee from employees where FIRST_NAME = parse_value(employee, 1) and LAST_NAME = parse_value(employee, 2);
+  insert into MANAGERS
+  values (SYSDATE, bonus, id_employee);
+  if teamname is not null then
+    update teams
+    set manager_id = id_employee
+    where team_name = teamname;
+  end if;
+end promote;
+end;
+/
+execute DEFAULT_FUNCTIONALITY.promote ('Kamil Biduœ', 200, 'zesp 1');
+
+/* check how the parser works */
+/*begin
+dbms_output.put_line(DEFAULT_FUNCTIONALITY.PARSE_VALUE('Kamil Biduœ', 1));
+end;*/
+/*begin
+dbms_output.put_line(DEFAULT_FUNCTIONALITY.PARSE_VALUE('Kamil Biduœ', 2));
+end;
+*/
 
 /* procedure fulfilling b), c) and d) criteria */
 create or replace procedure confirm_project(
@@ -239,50 +293,8 @@ begin
     
   commit;
 end confirm_project;
-
+/
 execute confirm_project('Millenium', 'Security', 'zesp 1');
-  
-/* parsing function, when flag=1 returns first word before ' ' when flag=2 returns second */
-create or replace function parse_value (pValue varchar2, flag number)
-   return varchar2
-is
-   v_pos number;
-   v_pos2 number;
-begin
-  if flag=1 then
-    v_pos2 := INSTR (pValue, ' ', 1) - 1; /* +1? */
-    v_pos := 1;
-  else
-    v_pos := INSTR (pValue, ' ', 1) + 1;
-    v_pos2 := LENGTH(pValue) - v_pos +1;
-  end if;
-  return SUBSTR (pValue, v_pos, v_pos2);
-end parse_value;
-
-/* check how does the parser work */
-begin
-dbms_output.put_line(parse_value('Kamil Biduœ', 1));
-end;
-begin
-dbms_output.put_line(parse_value('Kamil Biduœ', 2));
-end;
-
-/* procedure that has one argument, returns value, has substantial meaning, processes data from 3 tables */
-create or replace procedure promote(
-employee in varchar2, bonus in NUMBER, teamname in varchar2 default null) is
-id_employee EMPLOYEES.EMPLOYEE_ID%type;
-begin
-  select employee_id into id_employee from employees where FIRST_NAME = parse_value(employee, 1) and LAST_NAME = parse_value(employee, 2);
-  insert into MANAGERS
-  values (SYSDATE, bonus, id_employee);
-  if teamname is not null then
-    update teams
-    set manager_id = id_employee
-    where team_name = teamname;
-  end if;
-end promote;
-
-execute promote ('Kamil Biduœ', 200, 'zesp 1');
 
 /* cursor with a loop */
 declare
@@ -294,5 +306,4 @@ for wiersz in get_clietns_projects(4) loop
 dbms_output.put_line('pobrano kolejny wiersz, projekt: '|| wiersz.project_name);
 end loop;
 end;
-
 
