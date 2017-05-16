@@ -259,12 +259,14 @@ project_name in varchar2,
 team in varchar2) is
 id_team teams.team_id%type;
 id_client clients.client_id%type;
+cursor find_client_id IS
+select client_id into id_client from clients where client_name = company;
 begin
   declare
     any_rows_found1 number;
   begin
     select count(*) into any_rows_found1 from teams where rownum=1 and team_name = team;
-  if any_rows_found1=1 then
+    if any_rows_found1=1 then
       select team_id into id_team from teams where team_name = team;
   else
       raise_application_error (-20001, 'WRONG DATA');
@@ -281,8 +283,15 @@ begin
   end if;
   end;
   
-  select client_id into id_client from clients where client_name = company;
-  
+  --  select client_id into id_client from clients where client_name = company;
+
+  open find_client_id;
+  while 0<1 loop
+    fetch find_client_id into id_client;
+    exit when find_client_id%notfound;
+  end loop;
+  close find_client_id;
+    
   insert into projects
   values( seq_projects.nextval, project_name, id_team, id_client);
   
@@ -306,4 +315,31 @@ for wiersz in get_clietns_projects(4) loop
 dbms_output.put_line('pobrano kolejny wiersz, projekt: '|| wiersz.project_name);
 end loop;
 end;
+/
+create or replace trigger on_client_deletion
+before delete
+on clients
+for each row
+begin 
+if :old.client_name='Millenium' then
+    RAISE_APPLICATION_ERROR(-20999,'Nie mozna usunac tego klienta bez odpowienich pozwolen!');
+  end if;
+END;
+/
+create or replace trigger on_salary_change
+before update of salary on employees
+for each row
 
+declare diff number;
+begin
+diff:=:new.salary-:old.salary;
+dbms_output.put_line('Difference: '||diff);
+end;
+/
+
+create or replace trigger on_project_insert
+after insert on projects
+for each row
+begin
+dbms_output.put_line('Dodano nowy projekt. Do roboty!');
+end;
