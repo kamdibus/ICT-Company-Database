@@ -1,3 +1,6 @@
+drop trigger on_client_deletion;
+drop trigger on_salary_change;
+drop trigger on_project_insert;
 drop package default_functionality;
 drop procedure change_salary;
 drop procedure confirm_project;

@@ -102,7 +102,7 @@ insert into names_gender values ('Tomasz', 'male');
 insert into names_gender values ('Anna', 'female');
 
 insert into employees values (seq_employees.nextval, 96123100001, 'Tomasz', 'Nowak', 4100, 'Warszawa...');
-insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Bidu?', 4100, 'Warszawa...');
+insert into employees values (seq_employees.nextval, 96123100002, 'Kamil', 'Bidus', 4100, 'Warszawa...');
 insert into employees values (seq_employees.nextval, 96123100003, 'Anna', 'Kowalska', 4200, 'Krak?w...');
 insert into employees values (seq_employees.nextval, 96123100004, 'Tomasz', 'Kowalski', 4000, 'Krak?w...');
 
@@ -159,7 +159,7 @@ insert into works_on select employees.employee_id, projects.project_id, 15
 from employees, projects where last_name='Nowak' and project_name='projekt 1';
 
 insert into works_on select employees.employee_id, projects.project_id, 11
-from employees, projects where last_name='Bidu?' and project_name='projekt 1';
+from employees, projects where last_name='Bidus' and project_name='projekt 1';
 
 insert into works_on select employees.employee_id, projects.project_id, 11
 from employees, projects where last_name='Kowalska' and project_name='projekt 2';
@@ -241,14 +241,14 @@ begin
 end promote;
 end;
 /
-execute DEFAULT_FUNCTIONALITY.promote ('Kamil Biduœ', 200, 'zesp 1');
+execute DEFAULT_FUNCTIONALITY.promote ('Kamil Bidus', 200, 'zesp 1');
 
 /* check how the parser works */
 /*begin
-dbms_output.put_line(DEFAULT_FUNCTIONALITY.PARSE_VALUE('Kamil Biduœ', 1));
+dbms_output.put_line(DEFAULT_FUNCTIONALITY.PARSE_VALUE('Kamil Bidus', 1));
 end;*/
 /*begin
-dbms_output.put_line(DEFAULT_FUNCTIONALITY.PARSE_VALUE('Kamil Biduœ', 2));
+dbms_output.put_line(DEFAULT_FUNCTIONALITY.PARSE_VALUE('Kamil Bidus', 2));
 end;
 */
 
@@ -343,3 +343,9 @@ for each row
 begin
 dbms_output.put_line('Dodano nowy projekt. Do roboty!');
 end;
+/
+
+alter table employees
+modify (
+last_name varchar2(20)
+);
