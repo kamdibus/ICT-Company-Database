@@ -349,3 +349,34 @@ alter table employees
 modify (
 last_name varchar2(20)
 );
+
+create or replace procedure add_employee(
+pesel in number, 
+mf in varchar2,
+f_name in varchar2,
+l_name in varchar2,
+salary in number,
+address in varchar2) is
+begin
+  declare
+    any_rows_found1 number;
+  begin
+    select count(*) into any_rows_found1 from names_gender where rownum=1 and first_name = f_name;
+    if not any_rows_found1=1 then
+      if mf like 'm' then
+        insert into names_gender values (f_name, 'male');
+      else
+        insert into names_gender values (f_name, 'female');
+      end if;
+    end if;
+  end;
+
+  insert into employees
+  values( seq_employees.nextval, pesel, f_name, l_name, salary, address);
+  exception
+  when no_data_found then
+    raise_application_error (-20001, 'WRONG DATA');
+    rollback;
+  commit;
+end add_employee;
+/
